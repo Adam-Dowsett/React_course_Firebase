@@ -1,7 +1,8 @@
-import { getDocs, collection } from "firebase/firestore"
+import { getDocs, collection, deleteDoc, doc } from "firebase/firestore"
 import { useState, useEffect } from "react"
 import { db } from "../../config/firebase"
 import {Post} from "../../components"
+import "./MainPage.css"
 
 export interface Post {
     id: string;
@@ -28,13 +29,26 @@ const MainPage = () => {
         getPosts();
     }, [])
 
+    const deletePost = async (postId: string) => {
+        try{
+            const postToDelete = doc(db, "posts", postId)
+            await deleteDoc(postToDelete)
+            setPostsList((prev) => prev && prev?.filter((post) => post.id !== postId))
+        }
+        catch (e){
+            console.log(e)
+        }
+    }
+
     return (
         <div> 
-            {postsList?.map((post, key) => {
-                return (
-                    <Post post={post} key={key}/>
-                )
-            })}    
+            <div className="postContainer">
+                {postsList?.map((post, key) => {
+                    return (
+                        <Post post={post} key={key} deletePost={deletePost}/>
+                    )
+                })}
+            </div> 
         </div>
     )
 }
